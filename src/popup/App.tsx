@@ -22,6 +22,9 @@ const UNSUPPORTED_PREFIXES = [
   'about:',
   'data:',
   'javascript:',
+  'file://',
+  'blob:',
+  'ftp://',
 ]
 
 function isUnsupportedUrl(url: string): boolean {
@@ -57,7 +60,7 @@ async function loadPageInfo(): Promise<{ pageInfo: PageInformation; backgroundAl
   const pingResult = await sendMessage<{ type: 'PING_BACKGROUND' }, PingResponse>({
     type: 'PING_BACKGROUND',
   })
-  const backgroundAlive = pingResult.success && pingResult.data.alive
+  const backgroundAlive = pingResult.success && (pingResult.data?.alive ?? false)
 
   return { pageInfo, backgroundAlive }
 }
@@ -93,13 +96,21 @@ export function App() {
   const handleThemeChange = async (theme: UserPreferences['theme']) => {
     const updated: UserPreferences = { ...prefs, theme }
     setPrefs(updated)
-    await setUserPreferences(updated)
+    try {
+      await setUserPreferences(updated)
+    } catch {
+      // Storage write failed — UI optimistically shows the change but it won't persist
+    }
   }
 
   const handleTechDetailsToggle = async () => {
     const updated: UserPreferences = { ...prefs, showTechnicalDetails: !prefs.showTechnicalDetails }
     setPrefs(updated)
-    await setUserPreferences(updated)
+    try {
+      await setUserPreferences(updated)
+    } catch {
+      // Storage write failed — UI optimistically shows the change but it won't persist
+    }
   }
 
   return (

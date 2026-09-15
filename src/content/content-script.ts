@@ -1,4 +1,4 @@
-import type { ExtensionMessage } from '../messaging/message-types'
+import { isExtensionMessage } from '../messaging/message-types'
 
 chrome.runtime.onMessage.addListener(
   (message: unknown, _sender, sendResponse: (response: unknown) => void): boolean => {
@@ -11,11 +11,3 @@ chrome.runtime.onMessage.addListener(
     return false
   },
 )
-
-function isExtensionMessage(value: unknown): value is ExtensionMessage {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as Record<string, unknown>).type === 'string'
-  )
-}

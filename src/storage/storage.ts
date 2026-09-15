@@ -13,6 +13,10 @@ function isValidPreferences(value: unknown): value is UserPreferences {
 export function getUserPreferences(): Promise<UserPreferences> {
   return new Promise((resolve) => {
     chrome.storage.local.get(STORAGE_KEY, (result) => {
+      if (chrome.runtime.lastError) {
+        resolve({ ...DEFAULT_PREFERENCES })
+        return
+      }
       const stored = result[STORAGE_KEY]
       resolve(isValidPreferences(stored) ? stored : { ...DEFAULT_PREFERENCES })
     })
@@ -20,8 +24,14 @@ export function getUserPreferences(): Promise<UserPreferences> {
 }
 
 export function setUserPreferences(preferences: UserPreferences): Promise<void> {
-  return new Promise((resolve) => {
-    chrome.storage.local.set({ [STORAGE_KEY]: preferences }, resolve)
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [STORAGE_KEY]: preferences }, () => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message ?? 'Storage write failed'))
+        return
+      }
+      resolve()
+    })
   })
 }
 

@@ -1,5 +1,5 @@
-import type { ExtensionMessage } from '../messaging/message-types'
 import type { PingResponse } from '../messaging/message-types'
+import { isExtensionMessage } from '../messaging/message-types'
 
 chrome.runtime.onInstalled.addListener(() => {
   if (import.meta.env.DEV) {
@@ -19,11 +19,3 @@ chrome.runtime.onMessage.addListener(
     return false
   },
 )
-
-function isExtensionMessage(value: unknown): value is ExtensionMessage {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as Record<string, unknown>).type === 'string'
-  )
-}

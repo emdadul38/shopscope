@@ -12,3 +12,11 @@ export interface PingResponse {
 export interface ContentScriptResponse {
   pageInfo: PageInformation
 }
+
+export function isExtensionMessage(value: unknown): value is ExtensionMessage {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).type === 'string'
+  )
+}
