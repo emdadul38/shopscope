@@ -1,248 +1,209 @@
 # ShopScope – Shopify Store Inspector
 
-A Chrome Extension (Manifest V3) for inspecting Shopify stores directly from your browser.
+Chrome extension (Manifest V3) that inspects the active tab for Shopify storefront signals, classifies storefront type, and—when confirmed—lets you scan **publicly published** business contact details.
 
-## Phase 2 Scope
+**Version:** 0.3.0 · **Stack:** React, TypeScript, Vite, Vitest, Tailwind
 
-Phase 2 adds a multi-signal **Shopify Store Detection Engine**:
-
-- Content-script DOM and resource inspection on the active HTTP(S) tab
-- Weighted confidence scoring with independent-signal confirmation safeguards
-- Sanitized evidence displayed in the popup
-- Short-lived in-memory detection cache (tab + URL, 30s)
-- Auto-run on popup open; **Rescan** forces a fresh inspection
-
-Phase 1 foundation (popup page info, preferences, typed messaging, storage) is preserved.
-
-## Public Contact Information (user-triggered)
-
-When detection is **Confirmed Shopify Store**, the user may click **Find Public Contact Information**.
-
-This is a single-store, user-triggered inspector of **public business contact details** published on the storefront. It is **not** a bulk lead-harvesting tool.
-
-### What it collects (when published)
-
-- Business / store name from reliable public sources
-- Public business emails (`mailto:`, contact sections, JSON-LD)
-- Public phone numbers and social profile URLs when linked
-- Contact-page links discovered on the current page
-- Source URL, evidence, and confidence for each result
-
-### What it never does
-
-- Guess emails (`info@…`, `firstname@…`)
-- Search for the store owner’s private identity
-- Collect customer / review / blog incidental contacts
-- Read cookies, tokens, checkout data, or Admin pages
-- Decode Cloudflare / anti-harvesting email protection
-- Crawl external domains or more than five same-origin pages
-- Upload results, sync history, or auto-outreach
-- Run automatically after Shopify detection
-
-### Same-origin crawl limits
-
-| Limit | Value |
-| --- | --- |
-| Additional pages | ≤ 5 |
-| Request concurrency | 1 |
-| Body size | ≤ 1 MB |
-| Per-request timeout | 5 s |
-| Total scan timeout | 15 s |
-| Redirects | ≤ 1, same origin |
-| Credentials | `omit` |
-
-Fetches run from the **content script** (page origin) under `activeTab`. No `<all_urls>` host permission is added. If fetches fail, results are limited to the current page with a warning.
-
-### Retention
-
-- Cache key: `tabId + origin`
-- TTL: ≤ 30 minutes (in-memory service worker)
-- Cleared on tab close / origin change
-- Not written to `chrome.storage.sync`
-
-### Explicitly deferred (later)
-
-- Theme name / version detection
-- Installed Shopify app detection
-- Product or variant extraction
-- Pixel / SEO / performance auditing
-- Report export, accounts, billing, backend APIs
-- Remote signature updates or browsing-history collection
-- Bulk export or automatic outreach
 ---
 
-## Prerequisites
+## Features
 
-- Node.js 20+
-- pnpm 9+
-- Google Chrome 120+
+| Feature | Behavior |
+| --- | --- |
+| **Commerce detection** | Multi-signal Shopify detection with confidence, evidence, and storefront type (`theme`, `Hydrogen`, `headless`, etc.) |
+| **Deep scan** | Optional, user-triggered re-inspection for ambiguous results (resource observation + SPA awareness, ≤15s, cancellable) |
+| **Connected store** | Discover linked Shopify storefront candidates from marketing / headless pages |
+| **Public contacts** | Manual scan for business name, emails, phones, social links, and contact pages—only when Shopify is **confirmed** |
+| **Page info & prefs** | Active-tab URL/title, theme preference, technical details toggle |
 
-## Installation
+Detection runs when the popup opens on supported `http(s)` pages. Contact and deep scans start only after an explicit click.
+
+---
+
+## Quick start
 
 ```bash
 pnpm install
+pnpm build
 ```
 
-## Development Commands
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. **Load unpacked** → select the `dist/` folder
+4. Open any normal website and click the ShopScope icon
 
-| Command              | Description                           |
-| -------------------- | ------------------------------------- |
-| `pnpm dev`           | Watch mode — rebuilds on file changes |
-| `pnpm typecheck`     | TypeScript type check (no emit)       |
-| `pnpm lint`          | ESLint                                |
-| `pnpm lint:fix`      | ESLint with auto-fix                  |
-| `pnpm format`        | Prettier (write)                      |
-| `pnpm format:check`  | Prettier (check only)                 |
-| `pnpm test`          | Vitest (single run)                   |
-| `pnpm test:coverage` | Vitest with coverage report           |
-| `pnpm build`         | Production build → `dist/` (popup + SW + content script) |
-| `pnpm verify`        | typecheck + lint + test + build       |
+After code changes: `pnpm build`, then reload the extension.
 
 ---
 
-## Loading in Chrome
+## Requirements
 
-1. Run `pnpm build`
-2. Open Chrome → `chrome://extensions`
-3. Enable **Developer mode**
-4. Click **Load unpacked**
-5. Select the `dist/` folder
-6. Open a normal `http://` or `https://` page
-7. Click the ShopScope icon
-
-After changes: `pnpm build`, then reload the extension card.
-
-### Manual verification (Phase 2)
-
-1. Open a known Shopify storefront (custom domain or `*.myshopify.com`) → expect Confirmed or Highly Likely with confidence and evidence.
-2. Open a non-Shopify site (news, blog, WooCommerce) → expect Shopify Not Detected (not an error).
-3. Click **Rescan** → duration updates; no uncaught popup errors.
-4. Navigate the tab to another URL, reopen popup → stale cache is not reused.
-5. Open `chrome://extensions` → popup shows unsupported-page message; no crash.
+- Node.js 20+
+- pnpm 9+
+- Chrome 120+
 
 ---
 
-## Detection Architecture
+## Scripts
 
-```
-Popup
-  → RUN_SHOPIFY_DETECTION (force?)
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Watch rebuild (popup entry) |
+| `pnpm build` | Production build → `dist/` (popup + service worker + content script) |
+| `pnpm verify` | typecheck + lint + test + build |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm lint` / `pnpm lint:fix` | ESLint |
+| `pnpm format` / `pnpm format:check` | Prettier |
+| `pnpm test` / `pnpm test:coverage` | Vitest |
+
+---
+
+## Architecture
+
+```text
+Popup (React)
+  → typed messages
 Service worker
-  → ensure content script (scripting.executeScript)
-  → content script collects PageInspectionSnapshot (DOM/resources)
-  → MAIN-world probe for allowlisted window.Shopify fields
-  → detectShopifyFromSnapshot()
-  → validate + short-lived cache
-  → DetectionMessageResponse → popup
+  → inject / message content script
+  → MAIN-world probe (allowlisted window.Shopify fields)
+  → short-lived in-memory caches
+Content script
+  → DOM / resource inspection
+  → same-origin contact fetches (activeTab)
+  → deep scan / connected-store discovery
+Pure engines
+  → src/detectors/shopify   signal matching + confidence
+  → src/detectors/commerce  status / storefront resolution
+  → src/contacts            public contact extraction
 ```
 
-### Signal categories
+```text
+src/
+  background/     Service worker (orchestration, cache, gating)
+  content/        Inspectors, deep scan, contact page fetch
+  detectors/      Shopify + commerce detection (pure, testable)
+  contacts/       Public contact scanner (pure, testable)
+  popup/          React entry + theme
+  components/     UI cards and controls
+  messaging/      Typed chrome.runtime messaging + timeouts
+  storage/        UI preferences only (chrome.storage.local)
+  tests/          Unit, fixture, component, integration
+```
 
-| Signal                           | Category   | Weight |
-| -------------------------------- | ---------- | ------ |
-| Valid `*.myshopify.com` hostname | domain     | 30     |
-| Public `window.Shopify`          | javascript | 22     |
-| Shopify CDN assets               | resource   | 18     |
-| Generator / metadata             | metadata   | 18     |
-| Storefront / analytics scripts   | resource   | 16     |
-| Cart form actions                | markup     | 10     |
-| Section / payment markup         | markup     | 8      |
-| Combined route patterns          | network    | 4      |
+Build note: service worker and content script are bundled as self-contained IIFEs (`vite.sw.config.ts`, `vite.content.config.ts`) so injected scripts do not rely on ES module chunks.
 
-### Confidence algorithm
+---
+
+## Permissions
+
+| Permission | Why |
+| --- | --- |
+| `activeTab` | Read the active tab after the user opens the popup; enable same-origin fetches from the content script |
+| `scripting` | Inject the content script and run a MAIN-world Shopify probe |
+| `storage` | Persist UI preferences only |
+
+No `<all_urls>` host permission. No remote scripts. No backend upload of detection or contact results.
+
+---
+
+## Shopify detection
+
+Signals are weighted and combined into a 0–100 confidence score. Classification uses independent categories so one weak match cannot “confirm” a store.
+
+| Signal | Category | Weight |
+| --- | --- | --- |
+| Valid `*.myshopify.com` hostname | domain | 30 |
+| Public `window.Shopify` | javascript | 22 |
+| Shopify CDN assets | resource | 18 |
+| Generator / metadata | metadata | 18 |
+| Storefront / analytics scripts | resource | 16 |
+| Cart form actions | markup | 10 |
+| Section / payment markup | markup | 8 |
+| Combined route patterns | network | 4 |
 
 ```text
 confidence = round(min(100, (matchedScore / 55) * 100))
 ```
 
-Levels: `90+` confirmed · `70–89` highly likely · `40–69` possible · `<40` not detected.
+Commerce statuses include confirmed / likely Shopify, possible headless, connected store, unknown, and confirmed-other. Evidence is sanitized (no full HTML, cookies, or tokens).
 
-`detected = confirmed || highly_likely`.
+**Detection cache:** `tabId + normalized URL`, ~30s, in-memory. Invalidated on navigation, tab close, or Rescan.
 
-**Confirmation safeguard:** confirmed requires either one very-high signal plus another independent category, or three medium+ signals from distinct categories. A single weak signal never confirms.
-
-### Evidence sanitization
-
-- No full HTML, cookies, tokens, storage, or checkout/customer data
-- Query parameters stripped from URLs
-- Deduplicated, length-limited, max entries per signal
-
-See [docs/detector-development.md](docs/detector-development.md) for adding signals safely.
-
-### Cache behavior
-
-- Key: `tabId + normalized URL`
-- TTL: 30 seconds (in-memory service-worker state)
-- Invalidated on navigation, reload, tab close, Rescan (`force: true`), or expiry
-- If the service worker suspends, cache is lost and the next open re-inspects (safe fallback; no long-term history)
-
-### Privacy guarantees
-
-- No host permissions beyond user-gesture `activeTab`
-- No external network calls for detection
-- No merchant-sensitive payloads persisted to `chrome.storage`
-- Production logs never include page HTML or secrets
+See [docs/detector-development.md](docs/detector-development.md) to add signals safely.
 
 ---
 
-## Project Architecture
+## Public contact scan
 
-```
-src/
-  background/        Service worker — detection orchestration + cache
-  content/           Content script + document/resource inspectors
-  detectors/shopify/ Pure detection engine (signals, confidence, sanitizer)
-  popup/             React popup
-  components/        UI including ShopifyDetectionCard
-  messaging/         Typed messages + timeout wrapper
-  storage/           Preferences only
-  tests/             Unit, fixture, component, integration tests
-```
+Available only when detection status is **confirmed Shopify**. Always user-initiated.
 
----
+**Sources (public only):** JSON-LD Organization/Store, `mailto:` / `tel:`, labeled contact sections, footer text, `og:site_name`, linked social profiles, same-origin contact/about/policy links already present on the page.
 
-## Permission Justification
+**Hard limits**
 
-| Permission  | Reason                                              |
-| ----------- | --------------------------------------------------- |
-| `activeTab` | Read the current tab after the user opens the popup |
-| `storage`   | Persist UI preferences only                         |
-| `scripting` | Inject content script and MAIN-world Shopify probe  |
+| Limit | Value |
+| --- | --- |
+| Extra pages | ≤ 5, same origin, serial |
+| Body size | ≤ 1 MB |
+| Per-request / total timeout | 5s / 15s |
+| Redirects | ≤ 1, same origin |
+| Credentials | `omit` |
 
-No `<all_urls>` host permission. No remote scripts.
+**Never:** guess emails, scrape reviews/scripts/comments, decode anti-harvesting protections, crawl external domains, access Admin/auth data, upload or sync contact history, or bulk-harvest leads.
+
+**Contact cache:** `tabId + origin`, ≤ 30 minutes, in-memory; cleared on tab close or origin change.
 
 ---
 
-## Known Limitations
+## Privacy
 
-- Heavily customized storefronts that remove CDN/generator markers may score lower
-- Password / storefront-login walls may block inspection until unlocked
-- MAIN-world `window.Shopify` probe can miss if the object is absent or renamed
-- Service-worker cache does not survive process suspension
-- Generic `/products/` routes alone never confirm Shopify
-- Manual accuracy targets require a human test matrix (aggregate only)
+- Works on the **active tab** after a user gesture—no broad host access.
+- Detection needs no network calls beyond the page already loaded.
+- Contact fetches stay on the current origin under `activeTab`.
+- Results are not uploaded; preferences are the only `chrome.storage.local` data.
+- Evidence strings are bounded and URL query params are stripped.
+
+---
+
+## Manual smoke test
+
+1. Known Shopify storefront → confirmed or likely, with evidence.
+2. Non-Shopify site → not treated as an error; contacts hidden.
+3. Confirmed store → **Find Public Contact Information** works; no guessed emails.
+4. Ambiguous page → Deep scan optional; Cancel stops it.
+5. `chrome://` / Web Store → unsupported message, no crash.
+6. Navigate the tab → stale detection/contact cache is not reused.
+
+---
+
+## Out of scope
+
+Theme/app fingerprinting, product extraction, SEO/performance scores, report export, accounts/billing, remote signature updates, automatic outreach, and browsing-history collection.
+
+---
+
+## Known limitations
+
+- Customized themes that strip CDN/generator markers may score lower.
+- Password walls block inspection until unlocked.
+- MAIN-world `Shopify` probe misses renamed/absent globals.
+- Service worker caches die on suspension (safe; next open re-inspects).
+- Same-origin contact fetches can fail under CSP/network limits → current-page-only + warning.
+- Generic `/products/` routes alone never confirm Shopify.
 
 ---
 
 ## Troubleshooting
 
-**Detection timeout** — reload the tab and click Rescan.
-
-**Content script injection failed** — page may be restricted (Chrome Web Store, PDF, etc.).
-
-**Background Unavailable** — close and reopen the popup.
-
-**False “Not Detected” on a real Shopify shop** — open evidence; customized themes may need Phase 3 theme signals.
+| Symptom | What to try |
+| --- | --- |
+| Detection / contact timeout | Reload the tab, reopen popup, Rescan |
+| Content script injection failed | Restricted page type (PDF, Chrome Web Store, etc.) |
+| Background unavailable | Close and reopen the popup |
+| False negative on a real shop | Check evidence; theme may omit standard signals |
 
 ---
 
-## Phase 2 Acceptance Checklist
+## License
 
-- [ ] Phase 1 page info and preferences still work
-- [ ] Multi-signal detection returns confidence + evidence
-- [ ] Rescan and 30s cache behave as documented
-- [ ] Navigation invalidates stale results
-- [ ] Fixtures: Shopify / non-Shopify / blog / query false-positive pass
-- [ ] `pnpm verify` succeeds
-- [ ] `dist/` loads without manifest errors
-- [ ] No extra Chrome permissions
+Private project (`package.json`). Add a license file if you publish the repository.
