@@ -38,10 +38,7 @@ export function sendMessage<TReq, TRes = unknown>(
       clearTimeout(timer)
       resolve({
         success: false,
-        error: makeError(
-          'UNKNOWN_ERROR',
-          err instanceof Error ? err.message : 'Unknown error',
-        ),
+        error: makeError('UNKNOWN_ERROR', err instanceof Error ? err.message : 'Unknown error'),
       })
     }
   })

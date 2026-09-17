@@ -1,3 +1,50 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --surface: #fbfafe;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f3f1fa;
+  --border: #e4e1f0;
+  --border-strong: #c9c4e0;
+  --text-primary: #1a1730;
+  --text-secondary: #5b5770;
+  --text-tertiary: #8b87a0;
+  --link: #4536d1;
+  --link-hover: #362aad;
+  --good-bg: #e3f6f1;
+  --good-fg: #0b6e5b;
+  --warn-bg: #fbf0dc;
+  --warn-fg: #8a5a08;
+  --bad-bg: #fbe7e7;
+  --bad-fg: #a82a2a;
+  --info-bg: #eeecfd;
+  --info-fg: #4536d1;
+}
+
+.dark {
+  --surface: #15131f;
+  --surface-raised: #1e1b2e;
+  --surface-sunken: #100e1a;
+  --border: #322d48;
+  --border-strong: #423c5c;
+  --text-primary: #f4f2fa;
+  --text-secondary: #b5b0c9;
+  --text-tertiary: #7d7894;
+  --link: #a29cf7;
+  --link-hover: #c7c3fb;
+  --good-bg: #123c33;
+  --good-fg: #4fd9be;
+  --warn-bg: #3a2c0c;
+  --warn-fg: #e8b84b;
+  --bad-bg: #3d1717;
+  --bad-fg: #f08585;
+  --info-bg: #292350;
+  --info-fg: #a29cf7;
+}
+
+::selection {
+  background-color: var(--info-bg);
+  color: var(--info-fg);
+}

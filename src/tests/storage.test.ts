@@ -15,8 +15,7 @@ describe('getUserPreferences', () => {
   it('returns stored preferences when valid', async () => {
     const stored = { theme: 'dark', showTechnicalDetails: true }
     mockChrome.storage.local.get.mockImplementation(
-      (_key: string, cb: (r: Record<string, unknown>) => void) =>
-        cb({ userPreferences: stored }),
+      (_key: string, cb: (r: Record<string, unknown>) => void) => cb({ userPreferences: stored }),
     )
     const prefs = await getUserPreferences()
     expect(prefs).toEqual(stored)
@@ -42,8 +41,7 @@ describe('getUserPreferences', () => {
 
   it('returns defaults when stored value is null', async () => {
     mockChrome.storage.local.get.mockImplementation(
-      (_key: string, cb: (r: Record<string, unknown>) => void) =>
-        cb({ userPreferences: null }),
+      (_key: string, cb: (r: Record<string, unknown>) => void) => cb({ userPreferences: null }),
     )
     const prefs = await getUserPreferences()
     expect(prefs).toEqual(DEFAULT_PREFERENCES)

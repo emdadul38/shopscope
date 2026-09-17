@@ -1,13 +1,13 @@
 export function ExtensionHeader() {
   return (
-    <header className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+    <header className="flex items-center gap-2.5 border-b border-border bg-surface-raised px-4 py-3">
       <div
-        className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-sm font-bold"
+        className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-500 text-sm font-semibold text-white"
         aria-hidden="true"
       >
         S
       </div>
-      <h1 className="text-sm font-semibold text-gray-900">ShopScope</h1>
+      <h1 className="text-sm font-semibold text-ink">ShopScope</h1>
     </header>
   )
 }

@@ -4,8 +4,8 @@ import { sendMessage } from '../messaging/chrome-messenger'
 
 describe('sendMessage', () => {
   it('resolves with success result on normal response', async () => {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => cb({ alive: true }),
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) =>
+      cb({ alive: true }),
     )
     const result = await sendMessage<{ type: 'PING_BACKGROUND' }, { alive: boolean }>({
       type: 'PING_BACKGROUND',
@@ -14,12 +14,10 @@ describe('sendMessage', () => {
   })
 
   it('resolves with error when runtime.lastError is set', async () => {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => {
-        mockChrome.runtime.lastError = { message: 'Extension context invalid' }
-        cb(undefined)
-      },
-    )
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) => {
+      mockChrome.runtime.lastError = { message: 'Extension context invalid' }
+      cb(undefined)
+    })
     const result = await sendMessage({ type: 'PING_BACKGROUND' })
     expect(result.success).toBe(false)
     if (!result.success) {

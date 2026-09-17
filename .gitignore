@@ -1,5 +1,54 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-.DS_Store
-*.local
+build/
+*.tsbuildinfo
+
+# Test / coverage
 coverage/
+.nyc_output/
+
+# Vite / Vitest caches
+.vite/
+.vitest/
+.cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor / IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local overrides
+*.local
+
+# Optional tooling
+.eslintcache
+.stylelintcache
+.turbo/
+.parcel-cache/

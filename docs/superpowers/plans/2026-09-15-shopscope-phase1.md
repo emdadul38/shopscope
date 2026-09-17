@@ -25,12 +25,14 @@
 ### Task 1: Project Bootstrap
 
 **Files:**
+
 - Create: `package.json`
 - Create: `tsconfig.json`
 - Create: `.gitignore`
 - Create: `.prettierignore`
 
 **Interfaces:**
+
 - Produces: `pnpm install` succeeds; `node_modules` present; TypeScript compiler available
 
 - [ ] **Step 1: Write `package.json`**
@@ -150,6 +152,7 @@ git commit -m "chore: initialise project with pnpm and TypeScript"
 ### Task 2: Build Toolchain Configuration
 
 **Files:**
+
 - Create: `vite.config.ts`
 - Create: `vitest.config.ts`
 - Create: `tailwind.config.ts`
@@ -158,6 +161,7 @@ git commit -m "chore: initialise project with pnpm and TypeScript"
 - Create: `prettier.config.js`
 
 **Interfaces:**
+
 - Produces: `pnpm typecheck`, `pnpm lint`, `pnpm test` all runnable (will find no files yet — that is acceptable at this stage)
 
 - [ ] **Step 1: Write `vite.config.ts`**
@@ -315,10 +319,12 @@ git commit -m "chore: add build toolchain (Vite, Vitest, Tailwind, ESLint, Prett
 ### Task 3: Placeholder Icon Generator
 
 **Files:**
+
 - Create: `scripts/generate-icons.mjs`
 - Creates at runtime: `public/icons/icon-{16,32,48,128}.png`
 
 **Interfaces:**
+
 - Produces: four valid PNG files; `pnpm prebuild` runs without error
 
 - [ ] **Step 1: Write `scripts/generate-icons.mjs`**
@@ -332,13 +338,15 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const SIZES = [16, 32, 48, 128]
 // Indigo #6366f1
-const R = 0x63, G = 0x66, B = 0xf1
+const R = 0x63,
+  G = 0x66,
+  B = 0xf1
 
 function crc32(buf) {
   const table = new Uint32Array(256)
   for (let i = 0; i < 256; i++) {
     let c = i
-    for (let k = 0; k < 8; k++) c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
     table[i] = c
   }
   let crc = 0xffffffff
@@ -364,8 +372,8 @@ function makePng(size) {
   const ihdr = Buffer.allocUnsafe(13)
   ihdr.writeUInt32BE(size, 0)
   ihdr.writeUInt32BE(size, 4)
-  ihdr[8] = 8   // bit depth
-  ihdr[9] = 2   // color type: RGB
+  ihdr[8] = 8 // bit depth
+  ihdr[9] = 2 // color type: RGB
   ihdr[10] = ihdr[11] = ihdr[12] = 0
 
   const rowLen = 1 + size * 3
@@ -374,7 +382,9 @@ function makePng(size) {
     raw[y * rowLen] = 0 // filter: None
     for (let x = 0; x < size; x++) {
       const p = y * rowLen + 1 + x * 3
-      raw[p] = R; raw[p + 1] = G; raw[p + 2] = B
+      raw[p] = R
+      raw[p + 1] = G
+      raw[p + 2] = B
     }
   }
 
@@ -417,10 +427,12 @@ git commit -m "chore: add placeholder icon generator (solid indigo PNGs)"
 ### Task 4: Manifest + Popup HTML Shell
 
 **Files:**
+
 - Create: `manifest.json`
 - Create: `popup.html` (project root)
 
 **Interfaces:**
+
 - Produces: `dist/manifest.json` and `dist/popup.html` after build; Chrome can load the extension
 
 - [ ] **Step 1: Write `manifest.json`**
@@ -487,11 +499,13 @@ git commit -m "chore: add manifest.json and popup HTML shell"
 ### Task 5: Domain Types and Message Types
 
 **Files:**
+
 - Create: `src/types/page.ts`
 - Create: `src/types/chrome.d.ts`
 - Create: `src/messaging/message-types.ts`
 
 **Interfaces:**
+
 - Produces: `PageInformation`, `UserPreferences`, `ExtensionError`, `Result<T>`, `ERROR_CODES`, `ExtensionMessage`, `PingResponse` — imported by all other modules
 
 - [ ] **Step 1: Create directories**
@@ -521,9 +535,7 @@ export interface ExtensionError {
   message: string
 }
 
-export type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: ExtensionError }
+export type Result<T> = { success: true; data: T } | { success: false; error: ExtensionError }
 
 export const ERROR_CODES = {
   ACTIVE_TAB_NOT_FOUND: 'ACTIVE_TAB_NOT_FOUND',
@@ -551,9 +563,7 @@ export {}
 import type { PageInformation } from '../types/page'
 
 export type ExtensionMessage =
-  | { type: 'GET_PAGE_INFORMATION' }
-  | { type: 'PING_BACKGROUND' }
-  | { type: 'PING_CONTENT_SCRIPT' }
+  { type: 'GET_PAGE_INFORMATION' } | { type: 'PING_BACKGROUND' } | { type: 'PING_CONTENT_SCRIPT' }
 
 export interface PingResponse {
   alive: boolean
@@ -584,12 +594,14 @@ git commit -m "feat: add domain types and message type definitions"
 ### Task 6: Storage Layer (TDD)
 
 **Files:**
+
 - Create: `src/storage/storage-types.ts`
 - Create: `src/tests/setup.ts`
 - Create: `src/tests/storage.test.ts`
 - Create: `src/storage/storage.ts`
 
 **Interfaces:**
+
 - Consumes: `UserPreferences`, `ExtensionError` from `../types/page`
 - Produces:
   - `getUserPreferences(): Promise<UserPreferences>`
@@ -673,8 +685,7 @@ describe('getUserPreferences', () => {
   it('returns stored preferences when valid', async () => {
     const stored = { theme: 'dark', showTechnicalDetails: true }
     mockChrome.storage.local.get.mockImplementation(
-      (_key: string, cb: (r: Record<string, unknown>) => void) =>
-        cb({ userPreferences: stored }),
+      (_key: string, cb: (r: Record<string, unknown>) => void) => cb({ userPreferences: stored }),
     )
     const prefs = await getUserPreferences()
     expect(prefs).toEqual(stored)
@@ -700,8 +711,7 @@ describe('getUserPreferences', () => {
 
   it('returns defaults when stored value is null', async () => {
     mockChrome.storage.local.get.mockImplementation(
-      (_key: string, cb: (r: Record<string, unknown>) => void) =>
-        cb({ userPreferences: null }),
+      (_key: string, cb: (r: Record<string, unknown>) => void) => cb({ userPreferences: null }),
     )
     const prefs = await getUserPreferences()
     expect(prefs).toEqual(DEFAULT_PREFERENCES)
@@ -798,10 +808,12 @@ git commit -m "feat: add storage layer with validation and defaults (TDD)"
 ### Task 7: Messaging Layer (TDD)
 
 **Files:**
+
 - Create: `src/tests/messenger.test.ts`
 - Create: `src/messaging/chrome-messenger.ts`
 
 **Interfaces:**
+
 - Consumes: `ExtensionError`, `Result<T>`, `ERROR_CODES` from `../types/page`
 - Produces:
   - `sendMessage<TReq, TRes>(message: TReq, timeoutMs?: number): Promise<Result<TRes>>`
@@ -815,8 +827,8 @@ import { sendMessage } from '../messaging/chrome-messenger'
 
 describe('sendMessage', () => {
   it('resolves with success result on normal response', async () => {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => cb({ alive: true }),
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) =>
+      cb({ alive: true }),
     )
     const result = await sendMessage<{ type: 'PING_BACKGROUND' }, { alive: boolean }>({
       type: 'PING_BACKGROUND',
@@ -825,12 +837,10 @@ describe('sendMessage', () => {
   })
 
   it('resolves with error when runtime.lastError is set', async () => {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => {
-        mockChrome.runtime.lastError = { message: 'Extension context invalid' }
-        cb(undefined)
-      },
-    )
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) => {
+      mockChrome.runtime.lastError = { message: 'Extension context invalid' }
+      cb(undefined)
+    })
     const result = await sendMessage({ type: 'PING_BACKGROUND' })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -914,10 +924,7 @@ export function sendMessage<TReq, TRes = unknown>(
       clearTimeout(timer)
       resolve({
         success: false,
-        error: makeError(
-          'UNKNOWN_ERROR',
-          err instanceof Error ? err.message : 'Unknown error',
-        ),
+        error: makeError('UNKNOWN_ERROR', err instanceof Error ? err.message : 'Unknown error'),
       })
     }
   })
@@ -944,9 +951,11 @@ git commit -m "feat: add typed chrome messenger with timeout and error handling 
 ### Task 8: Background Service Worker
 
 **Files:**
+
 - Create: `src/background/service-worker.ts`
 
 **Interfaces:**
+
 - Consumes: `ExtensionMessage`, `PingResponse` from `../messaging/message-types`
 - Produces: responds to `PING_BACKGROUND` with `{ alive: true }`
 
@@ -1004,9 +1013,11 @@ git commit -m "feat: add background service worker with PING_BACKGROUND handler"
 ### Task 9: Content Script
 
 **Files:**
+
 - Create: `src/content/content-script.ts`
 
 **Interfaces:**
+
 - Produces: responds to `PING_CONTENT_SCRIPT` with `{ alive: true }` when injected
 
 Note: in Phase 1 the content script is built but not injected. Page info comes from the tab object. This file is Phase 2 infrastructure.
@@ -1057,6 +1068,7 @@ git commit -m "feat: add content script with PING_CONTENT_SCRIPT handler (Phase 
 ### Task 10: UI Components (TDD)
 
 **Files:**
+
 - Create: `src/styles/globals.css`
 - Create: `src/tests/components.test.tsx`
 - Create: `src/components/StatusBadge.tsx`
@@ -1065,6 +1077,7 @@ git commit -m "feat: add content script with PING_CONTENT_SCRIPT handler (Phase 
 - Create: `src/components/PageInformation.tsx`
 
 **Interfaces:**
+
 - Consumes: `PageInformation`, `UserPreferences`, `ExtensionError` from `../types/page`
 - Produces:
   - `<StatusBadge label variant>` — renders a coloured badge
@@ -1120,23 +1133,14 @@ describe('StatusBadge', () => {
 
 describe('ErrorState', () => {
   it('shows friendly message for UNSUPPORTED_URL', () => {
-    render(
-      <ErrorState
-        error={{ code: 'UNSUPPORTED_URL', message: 'raw' }}
-      />,
-    )
+    render(<ErrorState error={{ code: 'UNSUPPORTED_URL', message: 'raw' }} />)
     expect(screen.getByRole('alert')).toBeInTheDocument()
     expect(screen.getByText(/only works on regular web pages/i)).toBeInTheDocument()
   })
 
   it('calls onRetry when try-again button clicked', () => {
     const onRetry = vi.fn()
-    render(
-      <ErrorState
-        error={{ code: 'UNKNOWN_ERROR', message: 'oops' }}
-        onRetry={onRetry}
-      />,
-    )
+    render(<ErrorState error={{ code: 'UNKNOWN_ERROR', message: 'oops' }} onRetry={onRetry} />)
     fireEvent.click(screen.getByRole('button', { name: /try again/i }))
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
@@ -1491,11 +1495,13 @@ git commit -m "feat: add UI components (StatusBadge, ErrorState, ExtensionHeader
 ### Task 11: Popup App Entry (TDD)
 
 **Files:**
+
 - Create: `src/popup/main.tsx`
 - Create: `src/popup/App.tsx`
 - Create: `src/tests/popup.test.tsx`
 
 **Interfaces:**
+
 - Consumes: all components, storage functions, sendMessage, chrome globals
 - Produces: fully functional `<App>` component; popup.html renders the extension
 
@@ -1520,16 +1526,14 @@ function setupTab(overrides: Partial<chrome.tabs.Tab> = {}) {
 
 function setupBackground(alive: boolean) {
   if (alive) {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => cb({ alive: true }),
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) =>
+      cb({ alive: true }),
     )
   } else {
-    mockChrome.runtime.sendMessage.mockImplementation(
-      (_msg: unknown, cb: (r: unknown) => void) => {
-        mockChrome.runtime.lastError = { message: 'Unavailable' }
-        cb(undefined)
-      },
-    )
+    mockChrome.runtime.sendMessage.mockImplementation((_msg: unknown, cb: (r: unknown) => void) => {
+      mockChrome.runtime.lastError = { message: 'Unavailable' }
+      cb(undefined)
+    })
   }
 }
 
@@ -1740,7 +1744,10 @@ async function loadPageInfo(): Promise<{ pageInfo: PageInformation; backgroundAl
 
 export function App() {
   const [state, setState] = useState<AppState>({ status: 'loading' })
-  const [prefs, setPrefs] = useState<UserPreferences>({ theme: 'system', showTechnicalDetails: false })
+  const [prefs, setPrefs] = useState<UserPreferences>({
+    theme: 'system',
+    showTechnicalDetails: false,
+  })
 
   const load = useCallback(async () => {
     setState({ status: 'loading' })
@@ -1798,10 +1805,7 @@ export function App() {
         )}
 
         {(state.status === 'error' || state.status === 'unsupported') && (
-          <ErrorState
-            error={state.error}
-            onRetry={state.status === 'error' ? load : undefined}
-          />
+          <ErrorState error={state.error} onRetry={state.status === 'error' ? load : undefined} />
         )}
 
         {state.status === 'loaded' && (
@@ -1867,6 +1871,7 @@ git commit -m "feat: add popup App with page info display, preferences, and inte
 ### Task 12: README
 
 **Files:**
+
 - Create: `README.md`
 
 - [ ] **Step 1: Write `README.md`**
@@ -1910,18 +1915,18 @@ pnpm install
 
 ## Development Commands
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Watch mode — rebuilds on file changes |
-| `pnpm typecheck` | TypeScript type check (no emit) |
-| `pnpm lint` | ESLint |
-| `pnpm lint:fix` | ESLint with auto-fix |
-| `pnpm format` | Prettier (write) |
-| `pnpm format:check` | Prettier (check only) |
-| `pnpm test` | Vitest (single run) |
-| `pnpm test:coverage` | Vitest with coverage report |
-| `pnpm build` | Production build → `dist/` |
-| `pnpm verify` | typecheck + lint + test + build |
+| Command              | Description                           |
+| -------------------- | ------------------------------------- |
+| `pnpm dev`           | Watch mode — rebuilds on file changes |
+| `pnpm typecheck`     | TypeScript type check (no emit)       |
+| `pnpm lint`          | ESLint                                |
+| `pnpm lint:fix`      | ESLint with auto-fix                  |
+| `pnpm format`        | Prettier (write)                      |
+| `pnpm format:check`  | Prettier (check only)                 |
+| `pnpm test`          | Vitest (single run)                   |
+| `pnpm test:coverage` | Vitest with coverage report           |
+| `pnpm build`         | Production build → `dist/`            |
+| `pnpm verify`        | typecheck + lint + test + build       |
 
 ## Loading in Chrome
 
@@ -1973,11 +1978,11 @@ Popup opens
 
 ## Permission Justification
 
-| Permission | Reason |
-|---|---|
-| `activeTab` | Read the current tab's URL, title, and favicon |
-| `storage` | Persist user preferences (theme, technical details toggle) |
-| `scripting` | Reserved for Phase 2 content-script injection |
+| Permission  | Reason                                                     |
+| ----------- | ---------------------------------------------------------- |
+| `activeTab` | Read the current tab's URL, title, and favicon             |
+| `storage`   | Persist user preferences (theme, technical details toggle) |
+| `scripting` | Reserved for Phase 2 content-script injection              |
 
 No host permissions (`<all_urls>` or `http://*/*`) are requested.
 
@@ -2048,6 +2053,7 @@ pnpm verify
 ```
 
 Expected output (all must pass):
+
 - `tsc --noEmit` → exit 0
 - `eslint src` → 0 warnings, 0 errors
 - `vitest run` → all tests pass
@@ -2062,6 +2068,7 @@ ls -lh dist/assets/
 ```
 
 Expected:
+
 ```
 dist/
   manifest.json
@@ -2075,6 +2082,7 @@ dist/
 - [ ] **Step 4: Validate manifest references**
 
 Manually confirm these filenames exist in dist/:
+
 - `manifest.json` → `"service_worker": "service-worker.js"` → `dist/service-worker.js` ✓
 - `manifest.json` → `"default_popup": "popup.html"` → `dist/popup.html` ✓
 - `manifest.json` → `"16": "icons/icon-16.png"` → `dist/icons/icon-16.png` ✓

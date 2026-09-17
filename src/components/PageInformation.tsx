@@ -1,4 +1,5 @@
 import type { PageInformation, UserPreferences } from '../types/page'
+import { Button } from './Button'
 import { StatusBadge } from './StatusBadge'
 
 interface PageInformationViewProps {
@@ -21,40 +22,37 @@ export function PageInformationView({
   onTechDetailsToggle,
 }: PageInformationViewProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 border-t border-border pt-4">
       <div aria-live="polite">
-        <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Page Title</p>
-        <p className="text-sm text-gray-900 break-words">{pageInfo.title}</p>
+        <p className="text-[11px] font-medium text-ink-tertiary">Page title</p>
+        <p className="break-words text-sm text-ink">{pageInfo.title}</p>
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Hostname</p>
-        <p className="text-sm text-gray-900">{pageInfo.hostname}</p>
+        <p className="text-[11px] font-medium text-ink-tertiary">Hostname</p>
+        <p className="font-mono text-sm text-ink">{pageInfo.hostname}</p>
       </div>
 
       <div>
-        <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">URL</p>
-        <p className="text-sm text-gray-900 break-all">{pageInfo.url}</p>
+        <p className="text-[11px] font-medium text-ink-tertiary">URL</p>
+        <p className="break-all font-mono text-xs text-ink-secondary">{pageInfo.url}</p>
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">Background</span>
+        <span className="text-xs text-ink-secondary">Background</span>
         <StatusBadge
           label={backgroundAlive ? 'Connected' : 'Unavailable'}
           variant={backgroundAlive ? 'success' : 'error'}
         />
       </div>
 
-      <button
-        onClick={onRefresh}
-        className="w-full px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
+      <Button className="w-full" onClick={onRefresh}>
         Refresh Page Information
-      </button>
+      </Button>
 
-      <div className="border-t border-gray-100 pt-3 space-y-2">
+      <div className="space-y-2.5 border-t border-border pt-3">
         <div className="flex items-center justify-between">
-          <label htmlFor="tech-toggle" className="text-xs text-gray-600 cursor-pointer">
+          <label htmlFor="tech-toggle" className="cursor-pointer text-xs text-ink-secondary">
             Show technical details
           </label>
           <button
@@ -62,12 +60,12 @@ export function PageInformationView({
             role="switch"
             aria-checked={showTechnicalDetails}
             onClick={onTechDetailsToggle}
-            className={`relative w-9 h-5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-              showTechnicalDetails ? 'bg-indigo-600' : 'bg-gray-200'
+            className={`relative h-5 w-9 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+              showTechnicalDetails ? 'bg-brand-500' : 'bg-surface-sunken border border-border-strong'
             }`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+              className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
                 showTechnicalDetails ? 'translate-x-4' : ''
               }`}
             />
@@ -76,14 +74,14 @@ export function PageInformationView({
         </div>
 
         <div>
-          <label htmlFor="theme-select" className="text-xs text-gray-600">
+          <label htmlFor="theme-select" className="text-xs text-ink-secondary">
             Theme
           </label>
           <select
             id="theme-select"
             value={prefs.theme}
             onChange={(e) => onThemeChange(e.target.value as UserPreferences['theme'])}
-            className="mt-1 w-full text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="mt-1 w-full rounded-md border border-border bg-surface-sunken px-2 py-1 text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
           >
             <option value="system">System</option>
             <option value="light">Light</option>
@@ -93,12 +91,12 @@ export function PageInformationView({
       </div>
 
       {showTechnicalDetails && (
-        <div className="border-t border-gray-100 pt-3 space-y-1">
-          <p className="text-xs font-medium text-gray-700">Technical Details</p>
-          <p className="text-xs text-gray-500">
+        <div className="space-y-1 border-t border-border pt-3">
+          <p className="text-xs font-medium text-ink-secondary">Technical Details</p>
+          <p className="font-mono text-[11px] text-ink-tertiary">
             Collected: {new Date(pageInfo.collectedAt).toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="font-mono text-[11px] text-ink-tertiary">
             Background: {backgroundAlive ? 'Online' : 'Offline'}
           </p>
         </div>

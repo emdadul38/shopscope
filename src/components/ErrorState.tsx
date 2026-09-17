@@ -1,4 +1,5 @@
 import type { ExtensionError } from '../types/page'
+import { Button } from './Button'
 
 interface ErrorStateProps {
   error: ExtensionError
@@ -18,15 +19,12 @@ export function ErrorState({ error, onRetry }: ErrorStateProps) {
   const message = FRIENDLY[error.code] ?? FRIENDLY['UNKNOWN_ERROR']
 
   return (
-    <div role="alert" className="p-4 text-center space-y-3">
-      <p className="text-sm text-gray-600">{message}</p>
+    <div role="alert" className="space-y-3 px-4 py-8 text-center">
+      <p className="text-sm text-ink-secondary">{message}</p>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="px-3 py-1.5 text-xs font-medium text-indigo-600 border border-indigo-200 rounded hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
+        <Button variant="secondary" onClick={onRetry}>
           Try again
-        </button>
+        </Button>
       )}
     </div>
   )

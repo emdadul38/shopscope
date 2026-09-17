@@ -4,16 +4,16 @@ interface StatusBadgeProps {
 }
 
 const variantClasses: Record<StatusBadgeProps['variant'], string> = {
-  success: 'bg-green-100 text-green-800',
-  warning: 'bg-yellow-100 text-yellow-800',
-  error: 'bg-red-100 text-red-800',
-  info: 'bg-blue-100 text-blue-800',
+  success: 'bg-good-bg text-good-fg',
+  warning: 'bg-warn-bg text-warn-fg',
+  error: 'bg-bad-bg text-bad-fg',
+  info: 'bg-info-bg text-info-fg',
 }
 
 export function StatusBadge({ label, variant }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${variantClasses[variant]}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${variantClasses[variant]}`}
     >
       {label}
     </span>

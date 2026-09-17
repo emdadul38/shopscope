@@ -14,17 +14,17 @@ Build the foundational Chrome Extension scaffold for ShopScope – a Shopify Sto
 
 ## Technology Stack
 
-| Concern | Choice |
-|---|---|
-| Framework | React 18 |
-| Language | TypeScript (strict) |
-| Build tool | Vite |
-| Extension API | Chrome Manifest V3 |
-| Styling | Tailwind CSS |
-| Tests | Vitest + React Testing Library |
-| Linting | ESLint (flat config) |
-| Formatting | Prettier |
-| Package manager | pnpm |
+| Concern         | Choice                         |
+| --------------- | ------------------------------ |
+| Framework       | React 18                       |
+| Language        | TypeScript (strict)            |
+| Build tool      | Vite                           |
+| Extension API   | Chrome Manifest V3             |
+| Styling         | Tailwind CSS                   |
+| Tests           | Vitest + React Testing Library |
+| Linting         | ESLint (flat config)           |
+| Formatting      | Prettier                       |
+| Package manager | pnpm                           |
 
 ---
 
@@ -93,24 +93,24 @@ CSP: default MV3 policy (no `unsafe-eval`, no remote scripts).
 
 ```ts
 interface PageInformation {
-  url: string;
-  title: string;
-  hostname: string;
-  faviconUrl?: string;
-  collectedAt: string;  // ISO 8601
+  url: string
+  title: string
+  hostname: string
+  faviconUrl?: string
+  collectedAt: string // ISO 8601
 }
 
 interface UserPreferences {
-  theme: "light" | "dark" | "system";
-  showTechnicalDetails: boolean;
+  theme: 'light' | 'dark' | 'system'
+  showTechnicalDetails: boolean
 }
 
 interface ExtensionError {
-  code: string;
-  message: string;
+  code: string
+  message: string
 }
 
-type Result<T> = { success: true; data: T } | { success: false; error: ExtensionError };
+type Result<T> = { success: true; data: T } | { success: false; error: ExtensionError }
 ```
 
 No `any`. `unknown` + type narrowing at all untrusted boundaries.
@@ -123,12 +123,11 @@ Three message types:
 
 ```ts
 type ExtensionMessage =
-  | { type: "GET_PAGE_INFORMATION" }
-  | { type: "PING_BACKGROUND" }
-  | { type: "PING_CONTENT_SCRIPT" };
+  { type: 'GET_PAGE_INFORMATION' } | { type: 'PING_BACKGROUND' } | { type: 'PING_CONTENT_SCRIPT' }
 ```
 
 `chrome-messenger.ts` provides a generic `sendMessage<TReq, TRes>` that:
+
 - Returns `Promise<Result<TRes>>` (never throws)
 - Races against a 5-second timeout
 - Handles `chrome.runtime.lastError` inside the callback (no unhandled rejections)
@@ -152,6 +151,7 @@ Unsupported pages: `chrome://`, Chrome Web Store, new tab, extension pages, miss
 ## Storage Layer
 
 Three exported pure async functions:
+
 - `getUserPreferences(): Promise<UserPreferences>`
 - `setUserPreferences(prefs: UserPreferences): Promise<void>`
 - `resetUserPreferences(): Promise<void>`
@@ -165,6 +165,7 @@ Validation: structural check of stored value — if any required key is missing 
 ## Popup UI (380px wide)
 
 States:
+
 - **Loading** — spinner while querying tab
 - **Unsupported** — `ErrorState` with friendly message (chrome://, new tab, etc.)
 - **Error** — `ErrorState` for unexpected failures
@@ -182,14 +183,14 @@ Accessibility: semantic HTML, keyboard-navigable controls, visible focus, proper
 
 ## Error Codes
 
-| Code | Trigger |
-|---|---|
-| `ACTIVE_TAB_NOT_FOUND` | No active tab returned |
-| `UNSUPPORTED_URL` | Non-http/https tab |
-| `BACKGROUND_UNAVAILABLE` | PING_BACKGROUND times out or errors |
-| `CONTENT_SCRIPT_UNAVAILABLE` | executeScript fails |
-| `MESSAGE_TIMEOUT` | sendMessage 5s timeout |
-| `UNKNOWN_ERROR` | Catch-all |
+| Code                         | Trigger                             |
+| ---------------------------- | ----------------------------------- |
+| `ACTIVE_TAB_NOT_FOUND`       | No active tab returned              |
+| `UNSUPPORTED_URL`            | Non-http/https tab                  |
+| `BACKGROUND_UNAVAILABLE`     | PING_BACKGROUND times out or errors |
+| `CONTENT_SCRIPT_UNAVAILABLE` | executeScript fails                 |
+| `MESSAGE_TIMEOUT`            | sendMessage 5s timeout              |
+| `UNKNOWN_ERROR`              | Catch-all                           |
 
 Stack traces never surface in the popup. Dev-only logging gated on `import.meta.env.DEV`.
 
@@ -210,6 +211,7 @@ dist/
 ```
 
 Key Vite settings:
+
 - `rollupOptions.input`: popup HTML + service-worker + content-script
 - `rollupOptions.output.manualChunks: {}` — disable chunk splitting for non-popup entries
 - Service worker and content script built as IIFE or ES module (MV3 supports ES module service workers)
@@ -248,6 +250,7 @@ Key Vite settings:
 `src/tests/setup.ts` installs a complete `chrome` global mock (tabs, runtime, scripting, storage) with `vi.fn()` stubs. `beforeEach` resets mock state.
 
 Test cases:
+
 - Popup loading state
 - Successful PageInformation render
 - Unsupported URL handling

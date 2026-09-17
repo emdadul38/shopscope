@@ -1,12 +1,12 @@
 {
   "name": "shopscope",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "prebuild": "node scripts/generate-icons.mjs",
     "dev": "vite build --watch",
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.sw.config.ts && vite build --config vite.content.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ShopScope – Shopify Store Inspector",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Inspect Shopify stores directly from your browser.",
   "permissions": ["activeTab", "storage", "scripting"],
   "action": {
@@ -15,8 +15,7 @@
     }
   },
   "background": {
-    "service_worker": "service-worker.js",
-    "type": "module"
+    "service_worker": "service-worker.js"
   },
   "icons": {
     "16": "icons/icon-16.png",

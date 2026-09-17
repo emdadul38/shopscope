@@ -35,23 +35,14 @@ describe('StatusBadge', () => {
 
 describe('ErrorState', () => {
   it('shows friendly message for UNSUPPORTED_URL', () => {
-    render(
-      <ErrorState
-        error={{ code: 'UNSUPPORTED_URL', message: 'raw' }}
-      />,
-    )
+    render(<ErrorState error={{ code: 'UNSUPPORTED_URL', message: 'raw' }} />)
     expect(screen.getByRole('alert')).toBeInTheDocument()
     expect(screen.getByText(/only works on regular web pages/i)).toBeInTheDocument()
   })
 
   it('calls onRetry when try-again button clicked', () => {
     const onRetry = vi.fn()
-    render(
-      <ErrorState
-        error={{ code: 'UNKNOWN_ERROR', message: 'oops' }}
-        onRetry={onRetry}
-      />,
-    )
+    render(<ErrorState error={{ code: 'UNKNOWN_ERROR', message: 'oops' }} onRetry={onRetry} />)
     fireEvent.click(screen.getByRole('button', { name: /try again/i }))
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
